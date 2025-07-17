@@ -122,7 +122,29 @@ export const updateProblem = asyncHandler(async (req, res) => {});
 export const deleteProblem = asyncHandler(async (req, res) => {});
 
 // public controllers
-export const getProblemById = asyncHandler(async (req, res) => {});
+export const getProblemById = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const problem = await db.problem.findUnique({
+        where: { id },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                },
+            },
+        },
+    });
+
+    if (!problem) {
+        return res.status(404).json(new ApiResponse(404, "Problem not found"));
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, "Problem fetched successfully", problem));
+});
 
 export const getAllProblems = asyncHandler(async (req, res) => {
     const problems = await db.problem.findMany({
