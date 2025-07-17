@@ -117,13 +117,150 @@ export const createProblem = asyncHandler(async (req, res) => {
     }
 });
 
-export const updateProblem = asyncHandler(async (req, res) => {});
+export const updateProblem = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const {
+        title,
+        description,
+        difficulty,
+        tags,
+        examples,
+        constraints,
+        testCases,
+        codeSnippets,
+        referenceSolutions,
+    } = req.body;
 
-export const deleteProblem = asyncHandler(async (req, res) => {});
+    // Authorization check: Ensure only admins can update problems
+    if (req.user?.role !== UserRole.ADMIN)
+        throw new ApiError(403, "Only admins can update problems");
+
+    // Check if problem exists
+    const existingProblem = await db.problem.findUnique({
+        where: { id },
+    });
+    if (!existingProblem) {
+        throw new ApiError(404, "Problem not found");
+    }
+
+    try {
+        // Validate reference solutions for each programming language
+        for (const [language, solution] of Object.entries(referenceSolutions)) {
+            const languageId = getJuggeOLanguageId(language);
+
+            if (!languageId) {
+                throw new ApiError(400, `Unsupported language: ${language}`);
+            }
+
+            const submission = testCases.map(({ input, output }) => ({
+                source_code: solution,
+                language_id: languageId,
+                stdin: input,
+                expected_output: output,
+            }));
+
+            console.log(
+                "Submitting reference solutions to Judge0 for validation:",
+                submission,
+            );
+
+            const submissionResponse = await submitBatchToJudgeO(submission);
+            const tokens = submissionResponse.map((item) => item.token);
+
+            console.log("Tokens for reference solutions:", tokens);
+            const results = await pollBatchResultsJudgeO(tokens);
+
+            for (let i = 0; i < results.length; i++) {
+                const result = results[i];
+                console.log("Result-----", result);
+                if (result.status.id !== 3) {
+                    throw new ApiError(
+                        400,
+                        `Testcase ${i + 1} failed for language ${language}`,
+                    );
+                }
+            }
+        }
+
+        // Update problem record in database
+        const updatedProblem = await db.problem.update({
+            where: { id },
+            data: {
+                title,
+                description,
+                difficulty,
+                tags,
+                examples,
+                constraints,
+                hints: req.body.hints || null,
+                editorial: req.body.editorial || null,
+                testCases: testCases || existingProblem.testCases,
+                codeSnippets: codeSnippets || existingProblem.codeSnippets,
+                referenceSolutions:
+                    referenceSolutions || existingProblem.referenceSolutions,
+            },
+        });
+
+        if (!updatedProblem) {
+            throw new ApiError(404, "Problem not found");
+        }
+
+        // Return successful response with updated problem data
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    "Problem updated successfully",
+                    updatedProblem,
+                ),
+            );
+    } catch (error) {
+        console.error("Error updating problem:", error);
+        throw new ApiError(500, "Failed to update problem", error);
+    }
+});
+
+export const deleteProblem = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res
+            .status(400)
+            .json(new ApiResponse(400, "Problem ID is required"));
+    }
+
+    // Authorization check: Ensure only admins can delete problems
+    if (req.user?.role !== UserRole.ADMIN)
+        throw new ApiError(403, "Only admins can delete problems");
+
+    // Check if problem exists
+    const existingProblem = await db.problem.findUnique({
+        where: { id },
+    });
+    if (!existingProblem) {
+        throw new ApiError(404, "Problem not found");
+    }
+
+    // Delete problem record from database
+    await db.problem.delete({
+        where: { id },
+    });
+
+    // Return successful response
+    return res
+        .status(200)
+        .json(new ApiResponse(200, "Problem deleted successfully"));
+});
 
 // public controllers
 export const getProblemById = asyncHandler(async (req, res) => {
     const { id } = req.params;
+    if (!id) {
+        return res
+            .status(400)
+            .json(new ApiResponse(400, "Problem ID is required"));
+    }
     const problem = await db.problem.findUnique({
         where: { id },
         include: {
