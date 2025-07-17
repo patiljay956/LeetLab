@@ -124,7 +124,32 @@ export const deleteProblem = asyncHandler(async (req, res) => {});
 // public controllers
 export const getProblemById = asyncHandler(async (req, res) => {});
 
-export const getAllProblems = asyncHandler(async (req, res) => {});
+export const getAllProblems = asyncHandler(async (req, res) => {
+    const problems = await db.problem.findMany({
+        orderBy: {
+            createdAt: "desc",
+        },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                },
+            },
+        },
+    });
+
+    if (problems.length === 0) {
+        return res.status(404).json(new ApiResponse(404, "No problems found"));
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, "All problems fetched successfully", problems),
+        );
+});
 
 export const getProblemsByCategory = asyncHandler(async (req, res) => {});
 
