@@ -37,3 +37,22 @@ export const verifyToken = asyncHandler(async (req, _, next) => {
         throw new ApiError(401, error.message || "invalid token ");
     }
 });
+
+export const checkAdmin = asyncHandler(async (req, _, next) => {
+    const userId = req.user.id;
+
+    const user = await db.user.findUnique({
+        where: {
+            id: userId,
+        },
+        select: {
+            role: true,
+        },
+    });
+
+    if (!user || user.role !== "ADMIN") {
+        throw new ApiError(403, "Access forbidden: Admin privileges required");
+    }
+
+    next();
+});
