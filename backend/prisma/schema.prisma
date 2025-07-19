@@ -25,39 +25,104 @@ enum Difficulty {
   HARD
 }
 
-
 model User {
-  id String @id @default(uuid())
-  name String?
-  email String @unique
-  image String?
-  role UserRole @default(USER)
-  password String
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  image     String?
+  role      UserRole @default(USER)
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   problems Problem[]
+
+  submission submission[]
+
+  problemSolved problemSolved[]
 }
 
 model Problem {
-  id String @id @default(uuid())
-  title String
+  id          String     @id @default(uuid())
+  title       String
   description String
-  difficulty Difficulty
-  tags String[] // ["array","microsoft", "Math"]
-  userId String
-  examples Json
+  difficulty  Difficulty
+  tags        String[] // ["array","microsoft", "Math"]
+  userId      String
+  examples    Json
   constraints String
-  hints String?
-  editorial String?
+  hints       String?
+  editorial   String?
 
-  testCases Json
-  codeSnippets Json
+  testCases          Json
+  codeSnippets       Json
   referenceSolutions Json
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // relationships
-  user User @relation(fields: [userId], references: [id],onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  submission submission[]
+
+  problemSolvedBy problemSolved[]
+}
+
+model submission {
+  id             String  @id @default(uuid())
+  userId         String
+  problemId      String
+  sourceCode     Json
+  language       String
+  stdin          String?
+  stdout         String?
+  stderr         String?
+  compiledOutput String?
+  status         String // accepted, wrong answer, runtime error, etc.
+  timeTaken      Int // in milliseconds 
+  memoryUsed     Int // in bytes
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  testCases TestCaseResult[]
+}
+
+model TestCaseResult {
+  id             String  @id @default(uuid())
+  submissionId   String
+  testCaseIndex  Int
+  input          String
+  expectedOutput String
+  actualOutput   String?
+  status         String // passed, failed, error
+  timeTaken      Int // in milliseconds
+  memoryUsed     Int // in bytes
+  type           String // "public", "hidden",
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  submission submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index(submissionId) // Index for faster lookups
+}
+
+model problemSolved {
+  id        String   @id @default(uuid())
+  userId    String
+  problemId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, problemId]) // Ensure a user can only solve a problem once
+  @@index([userId, problemId]) // Index for faster lookups
 }
