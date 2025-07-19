@@ -1,6 +1,5 @@
 import { db } from "../libs/db.js";
 import { UserRole } from "../generated/prisma/index.js";
-import jwt from "jsonwebtoken";
 
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiErrors.js";

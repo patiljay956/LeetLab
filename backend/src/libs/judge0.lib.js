@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ApiError } from "../utils/apiErrors.js";
 
 export const getJuggeOLanguageId = (language) => {
     const languageMap = {
@@ -15,13 +16,18 @@ export const getJuggeOLanguageId = (language) => {
 // Example : POST https://ce.judge0.com/submissions/batch?base64_encoded=false&wait=true
 
 export const submitBatchToJudgeO = async (submissions) => {
-    const { data } = await axios.post(
-        `${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false&wait=true`,
-        { submissions },
-    );
+    try {
+        const { data } = await axios.post(
+            `${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false&wait=true`,
+            { submissions },
+        );
 
-    console.log("JudgeO Batch Submission Response:", data);
-    return data; // [{token},{token},...]
+        console.log("JudgeO Batch Submission Response:", data);
+        return data; // [{token},{token},...]
+    } catch (error) {
+        console.error("Error submitting batch to JudgeO:", error.message);
+        throw new ApiError(500, "Failed to submit code to Judge0", error);
+    }
 };
 
 // api endpoint : GET/submissions/batch{?tokens,base64_encoded,fields}
@@ -50,7 +56,6 @@ export const pollBatchResultsJudgeO = async (tokens) => {
         );
 
         if (isAllCompleted) {
-            console.log("JudgeO Batch Results:", data);
             return data; // Return all submission results
         }
 

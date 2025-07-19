@@ -23,9 +23,11 @@ app.use(cookieParser());
 // Routes
 import authRoutes from "./routes/auth.routes.js";
 import problemRoutes from "./routes/problem.routes.js";
+import executionRoutes from "./routes/execution.routes.js";
 // Routes Declaration
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/problem", problemRoutes);
+app.use("/api/v1/code-evaluation", executionRoutes);
 
 // Global Error Handler
 import { ApiError } from "./utils/apiErrors.js";
