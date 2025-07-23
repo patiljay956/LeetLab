@@ -289,8 +289,128 @@ export const submitCode = asyncHandler(async (req, res) => {
     );
 });
 
-export const getSubmission = asyncHandler(async (req, res) => {});
+export const getSubmissionById = asyncHandler(async (req, res) => {
+    const submissionId = req.params.id;
 
-export const getSubmissionsByProblem = asyncHandler(async (req, res) => {});
+    if (!submissionId) {
+        throw new ApiError(400, "Submission ID is required");
+    }
 
-export const getSubmissionsByUser = asyncHandler(async (req, res) => {});
+    // Fetch the submission from the database
+    const submission = await db.submission.findUnique({
+        where: { id: submissionId },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                },
+            },
+            problem: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+            testCase: true,
+        },
+    });
+
+    if (!submission) {
+        throw new ApiError(404, "Submission not found");
+    }
+
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            "Submission fetched successfully",
+            submission,
+            true,
+        ),
+    );
+});
+
+export const getSubmissionsByProblem = asyncHandler(async (req, res) => {
+    const problemId = req.params.id;
+
+    if (!problemId) {
+        throw new ApiError(400, "Problem ID is required");
+    }
+
+    // Fetch submissions for the given problem
+    const submissions = await db.submission.findMany({
+        where: { problemId },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                },
+            },
+            problem: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+            testCases: true,
+        },
+        orderBy: { createdAt: "desc" }, // Order by creation date
+    });
+
+    if (!submissions || submissions.length === 0) {
+        throw new ApiError(404, "No submissions found for this problem");
+    }
+
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            "Submissions fetched successfully",
+            submissions,
+            true,
+        ),
+    );
+});
+
+export const getSubmissionsByUser = asyncHandler(async (req, res) => {
+    const userId = req.params.id;
+    if (!userId) {
+        throw new ApiError(400, "User ID is required");
+    }
+
+    // Fetch submissions for the given user
+    const submissions = await db.submission.findMany({
+        where: { userId },
+        include: {
+            problem: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+            problem: {
+                select: {
+                    id: true,
+                    title: true,
+                },
+            },
+            testCases: true,
+        },
+        orderBy: { createdAt: "desc" }, // Order by creation date
+    });
+
+    if (!submissions || submissions.length === 0) {
+        throw new ApiError(404, "No submissions found for this user");
+    }
+
+    res.status(200).json(
+        new ApiResponse(
+            200,
+            "Submissions fetched successfully",
+            submissions,
+            true,
+        ),
+    );
+});
