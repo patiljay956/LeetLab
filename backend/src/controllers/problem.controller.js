@@ -309,16 +309,109 @@ export const getAllProblems = asyncHandler(async (req, res) => {
         );
 });
 
-export const getProblemsByCategory = asyncHandler(async (req, res) => {});
+export const getProblemsByTags = asyncHandler(async (req, res) => {
+    const { tag } = req.params;
+    if (!tag) {
+        return res.status(400).json(new ApiResponse(400, "Tag is required"));
+    }
 
-export const getProblemsByDifficulty = asyncHandler(async (req, res) => {});
+    const problems = await db.problem.findMany({
+        where: {
+            tags: {
+                has: tag,
+            },
+        },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                },
+            },
+        },
+    });
 
-export const getAllSolvedProblemsByUser = asyncHandler(async (req, res) => {});
+    if (problems.length === 0) {
+        return res.status(404).json(new ApiResponse(404, "No problems found"));
+    }
 
-export const submitProblem = asyncHandler(async (req, res) => {});
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                `Problems with tag ${tag} fetched successfully`,
+                problems,
+            ),
+        );
+});
 
-export const getSubmissionsByProblem = asyncHandler(async (req, res) => {});
+export const getProblemsByDifficulty = asyncHandler(async (req, res) => {
+    const { level } = req.params;
+    if (!level) {
+        return res
+            .status(400)
+            .json(new ApiResponse(400, "Difficulty level is required"));
+    }
 
-// user controllers
+    const problems = await db.problem.findMany({
+        where: { difficulty: level },
+        include: {
+            user: {
+                select: {
+                    id: true,
+                    name: true,
+                    image: true,
+                },
+            },
+        },
+    });
 
-export const getSubmissionsByUser = asyncHandler(async (req, res) => {});
+    if (problems.length === 0) {
+        return res.status(404).json(new ApiResponse(404, "No problems found"));
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                `Problems with difficulty ${level} fetched successfully`,
+                problems,
+            ),
+        );
+});
+
+export const getAllSolvedProblemsByUser = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const solvedProblems = await db.problemSolved.findMany({
+        where: { userId },
+        include: {
+            problem: {
+                select: {
+                    id: true,
+                    title: true,
+                    difficulty: true,
+                    tags: true,
+                },
+            },
+        },
+    });
+
+    if (solvedProblems.length === 0) {
+        return res
+            .status(404)
+            .json(new ApiResponse(404, "No solved problems found"));
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                "All solved problems fetched successfully",
+                solvedProblems,
+            ),
+        );
+});

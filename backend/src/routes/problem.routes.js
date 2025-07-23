@@ -6,11 +6,8 @@ import {
     getAllProblems,
     getAllSolvedProblemsByUser,
     getProblemById,
-    getProblemsByCategory,
+    getProblemsByTags,
     getProblemsByDifficulty,
-    getSubmissionsByProblem,
-    getSubmissionsByUser,
-    submitProblem,
     updateProblem,
 } from "../controllers/problem.controller.js";
 const router = Router();
@@ -25,15 +22,10 @@ router.route("/create-problem").post(verifyToken, checkAdmin, createProblem);
 // Public problem routes
 router.route("/get-problem/:id").get(getProblemById);
 router.route("/get-all-problems").get(getAllProblems);
-router.route("/problems/category/:category").get(getProblemsByCategory);
+router.route("/problems/tags/:tag").get(getProblemsByTags);
 router.route("/problems/difficulty/:level").get(getProblemsByDifficulty);
-router.route("/submissions/:problemId").get(getSubmissionsByProblem);
 
 // Submission routes
 router.route("/submit-all").get(verifyToken, getAllSolvedProblemsByUser); // get all problems solved by user
-router.route("/submit/:problemId").post(verifyToken, submitProblem);
-router
-    .route("/submissions/user/:userId")
-    .get(verifyToken, getSubmissionsByUser);
 
 export default router;
