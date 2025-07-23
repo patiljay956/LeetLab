@@ -20,19 +20,23 @@
         "testCases": [
             {
                 "input": "0",
-                "output": "Even"
+                "output": "Even",
+                "type": "public"
             },
             {
                 "input": "-3",
-                "output": "Odd"
+                "output": "Odd",
+                "type": "public"
             },
             {
                 "input": "-8",
-                "output": "Even"
+                "output": "Even",
+                "type": "public"
             },
             {
                 "input": "999999999",
-                "output": "Odd"
+                "output": "Odd",
+                "type": "private"
             }
         ],
         "codeSnippets": {
@@ -171,19 +175,28 @@
         "testCases": [
             {
                 "input": "2",
-                "output": "Prime"
+                "output": "Prime",
+                "type": "public"
             },
             {
                 "input": "-3",
-                "output": "Not Prime"
+                "output": "Not Prime",
+                "type": "public"
             },
             {
                 "input": "-8",
-                "output": "Not Prime"
+                "output": "Not Prime",
+                "type": "public"
             },
             {
                 "input": "-999999999",
-                "output": "Not Prime"
+                "output": "Not Prime",
+                "type": "private"
+            },
+            {
+                "input": "999999999",
+                "output": "Not Prime",
+                "type": "private"
             }
         ],
         "codeSnippets": {
@@ -222,19 +235,23 @@
         "testCases": [
             {
                 "input": "madam",
-                "output": "Palindrome"
+                "output": "Palindrome",
+                "type": "public"
             },
             {
                 "input": "12321",
-                "output": "Palindrome"
+                "output": "Palindrome",
+                "type": "public"
             },
             {
                 "input": "!@#@!",
-                "output": "Not Palindrome"
+                "output": "Not Palindrome",
+                "type": "public"
             },
             {
                 "input": "",
-                "output": "Palindrome"
+                "output": "Not Palindrome",
+                "type": "private"
             }
         ],
         "codeSnippets": {
@@ -244,7 +261,7 @@
             "CPP": "// Function to check if a string is a palindrome\n#include <iostream>\n#include <algorithm>\nusing namespace std;\n\nbool isPalindrome(string str) {\n    string reversed = str;\n    reverse(reversed.begin(), reversed.end());\n    return str == reversed;\n}\n\nint main() {\n    string input;\n    cin >> input;\n    cout << (isPalindrome(input) ? \"Palindrome\" : \"Not Palindrome\") << endl;\n    return 0;\n}"
         },
         "referenceSolutions": {
-            "JAVASCRIPT": "// Function to check if a string is a palindrome\nfunction isPalindrome(str) {\n    const reversed = str.split('').reverse().join('');\n    return str === reversed;\n}\n\n// Reading input from stdin\nconst fs = require('fs');\nconst input = fs.readFileSync(0, 'utf-8').trim();\nconsole.log(isPalindrome(input) ? 'Palindrome' : 'Not Palindrome');",
+            "JAVASCRIPT": "// Function to check if a string is a palindrome\nfunction isPalindrome(str) {\n    if (str === \"\") {\n        return false;  // Return false if the string is empty\n    }\n    const reversed = str.split('').reverse().join('');\n    return str === reversed;\n}\n\n// Reading input from stdin\nconst fs = require('fs');\nconst input = fs.readFileSync(0, 'utf-8').trim();\nconsole.log(isPalindrome(input) ? 'Palindrome' : 'Not Palindrome');",
             "PYTHON": "# Function to check if a string is a palindrome\n\ndef is_palindrome(s):\n    return s == s[::-1]\n\n# Reading input from stdin\nimport sys\ninput_line = sys.stdin.read().strip()\nprint('Palindrome' if is_palindrome(input_line) else 'Not Palindrome')",
             "JAVA": "// Function to check if a string is a palindrome\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String input = sc.nextLine();\n        System.out.println(isPalindrome(input) ? \"Palindrome\" : \"Not Palindrome\");\n    }\n\n    public static boolean isPalindrome(String str) {\n        String reversed = new StringBuilder(str).reverse().toString();\n        return str.equals(reversed);\n    }\n}",
             "CPP": "// Function to check if a string is a palindrome\n#include <iostream>\n#include <algorithm>\nusing namespace std;\n\nbool isPalindrome(string str) {\n    string reversed = str;\n    reverse(reversed.begin(), reversed.end());\n    return str == reversed;\n}\n\nint main() {\n    string input;\n    cin >> input;\n    cout << (isPalindrome(input) ? \"Palindrome\" : \"Not Palindrome\") << endl;\n    return 0;\n}"

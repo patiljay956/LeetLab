@@ -63,3 +63,14 @@ export const pollBatchResultsJudgeO = async (tokens) => {
         await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 };
+
+export const getLanguageNameById = (languageId) => {
+    const languageMap = {
+        54: "CPP",
+        62: "Java",
+        71: "Python",
+        63: "JavaScript",
+        // Add more languages as needed
+    };
+    return languageMap[languageId] || null;
+};
