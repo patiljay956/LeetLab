@@ -19,11 +19,11 @@ router
 
 router.route("/create-problem").post(verifyToken, checkAdmin, createProblem);
 
-// Public problem routes
+// public problem routes
 router.route("/get-problem/:id").get(getProblemById);
 router.route("/get-all-problems").get(getAllProblems);
-router.route("/problems/tags/:tag").get(getProblemsByTags);
-router.route("/problems/difficulty/:level").get(getProblemsByDifficulty);
+router.route("/tags/:tag").get(getProblemsByTags);
+router.route("/difficulty/:level").get(getProblemsByDifficulty);
 
 // Submission routes
 router.route("/submit-all").get(verifyToken, getAllSolvedProblemsByUser); // get all problems solved by user

@@ -1,5 +1,5 @@
 import { db } from "../libs/db.js";
-import { UserRole } from "../generated/prisma/index.js";
+import { Difficulty, UserRole } from "../generated/prisma/index.js";
 
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiErrors.js";
@@ -354,9 +354,14 @@ export const getProblemsByDifficulty = asyncHandler(async (req, res) => {
             .status(400)
             .json(new ApiResponse(400, "Difficulty level is required"));
     }
+    if (!Object.values(Difficulty).includes(level.toUpperCase())) {
+        return res
+            .status(400)
+            .json(new ApiResponse(400, "Invalid difficulty level"));
+    }
 
     const problems = await db.problem.findMany({
-        where: { difficulty: level },
+        where: { difficulty: Difficulty[level.toUpperCase()] },
         include: {
             user: {
                 select: {
