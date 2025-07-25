@@ -108,7 +108,7 @@ export const createProblem = asyncHandler(async (req, res) => {
         return res
             .status(201)
             .json(
-                new ApiResponse(201, "Problem created successfully", problem),
+                new ApiResponse(201, problem, "Problem created successfully"),
             );
     } catch (error) {
         console.error("Error creating problem:", error);
@@ -210,8 +210,8 @@ export const updateProblem = asyncHandler(async (req, res) => {
             .json(
                 new ApiResponse(
                     200,
-                    "Problem updated successfully",
                     updatedProblem,
+                    "Problem updated successfully",
                 ),
             );
     } catch (error) {
@@ -248,8 +248,8 @@ export const deleteProblem = asyncHandler(async (req, res) => {
 
     // Return successful response
     return res
-        .status(200)
-        .json(new ApiResponse(200, "Problem deleted successfully"));
+        .status(203)
+        .json(new ApiResponse(200, {}, "Problem deleted successfully"));
 });
 
 // public controllers
@@ -279,7 +279,7 @@ export const getProblemById = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200, "Problem fetched successfully", problem));
+        .json(new ApiResponse(200, problem, "Problem fetched successfully"));
 });
 
 export const getAllProblems = asyncHandler(async (req, res) => {
@@ -305,7 +305,7 @@ export const getAllProblems = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiResponse(200, "All problems fetched successfully", problems),
+            new ApiResponse(200, problems, "All problems fetched successfully"),
         );
 });
 
@@ -341,8 +341,8 @@ export const getProblemsByTags = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                `Problems with tag ${tag} fetched successfully`,
                 problems,
+                `Problems with tag ${tag} fetched successfully`,
             ),
         );
 });
@@ -382,8 +382,8 @@ export const getProblemsByDifficulty = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                `Problems with difficulty ${level} fetched successfully`,
                 problems,
+                `Problems with difficulty ${level} fetched successfully`,
             ),
         );
 });
@@ -415,8 +415,93 @@ export const getAllSolvedProblemsByUser = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                "All solved problems fetched successfully",
                 solvedProblems,
+                "All solved problems fetched successfully",
             ),
         );
+});
+
+export const getSolutionForProblem = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+        return res
+            .status(400)
+            .json(new ApiResponse(400, "Problem ID is required"));
+    }
+    // check if user submitted the problem at least once
+    const submission = await db.submission.findFirst({
+        where: { problemId: id, userId: req.user?.id },
+    });
+
+    if (!submission) {
+        return res
+            .status(404)
+            .json(
+                new ApiResponse(
+                    404,
+                    "Try to solve the problem at least once before getting into solutions",
+                ),
+            );
+    }
+
+    const problem = await db.problem.findUnique({
+        where: { id },
+        select: {
+            referenceSolutions: true,
+            codeSnippets: true,
+        },
+    });
+
+    if (!problem) {
+        return res.status(404).json(new ApiResponse(404, "Problem not found"));
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                problem,
+                "Problem solutions fetched successfully",
+            ),
+        );
+});
+
+export const getHintsForProblem = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    if (!id) {
+        return res
+            .status(400)
+            .json(new ApiResponse(400, "Problem ID is required"));
+    }
+
+    // check if user submitted the problem at least once
+    const submission = await db.submission.findFirst({
+        where: { problemId: id, userId: req.user?.id },
+    });
+    if (!submission) {
+        return res
+            .status(404)
+            .json(
+                new ApiResponse(
+                    404,
+                    "Try to solve the problem at least once before getting hints",
+                ),
+            );
+    }
+
+    const problem = await db.problem.findUnique({
+        where: { id },
+        select: {
+            hints: true,
+        },
+    });
+
+    if (!problem) {
+        return res.status(404).json(new ApiResponse(404, "Problem not found"));
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, problem, "Hints fetched successfully"));
 });

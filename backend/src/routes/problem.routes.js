@@ -9,6 +9,8 @@ import {
     getProblemsByTags,
     getProblemsByDifficulty,
     updateProblem,
+    getSolutionForProblem,
+    getHintsForProblem,
 } from "../controllers/problem.controller.js";
 const router = Router();
 // Problem management routes (admin only)
@@ -24,6 +26,9 @@ router.route("/get-problem/:id").get(getProblemById);
 router.route("/get-all-problems").get(getAllProblems);
 router.route("/tags/:tag").get(getProblemsByTags);
 router.route("/difficulty/:level").get(getProblemsByDifficulty);
+
+router.route("/get-solutions/:id").get(verifyToken, getSolutionForProblem);
+router.route("/get-hints/:id").get(verifyToken, getHintsForProblem);
 
 // Submission routes
 router.route("/submit-all").get(verifyToken, getAllSolvedProblemsByUser); // get all problems solved by user

@@ -313,7 +313,7 @@ export const getSubmissionById = asyncHandler(async (req, res) => {
                     title: true,
                 },
             },
-            testCase: true,
+            testCases: true,
         },
     });
 
