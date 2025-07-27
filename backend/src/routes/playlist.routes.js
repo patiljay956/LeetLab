@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { checkAdmin, verifyToken } from "../middlewares/auth.middleware.js";
+import { verifyToken } from "../middlewares/auth.middleware.js";
 import {
     // Import all the controller functions
     createPlaylist,
@@ -19,23 +19,23 @@ const router = Router();
 // Playlist routes
 router
     .route("/playlists")
-    .post(verifyToken, checkAdmin, createPlaylist)
+    .post(verifyToken, createPlaylist)
     .get(verifyToken, getPlaylists);
 
 router
     .route("/playlists/:id")
     .get(verifyToken, getPlaylistById)
-    .put(verifyToken, checkAdmin, updatePlaylist)
-    .delete(verifyToken, checkAdmin, deletePlaylist);
+    .put(verifyToken, updatePlaylist)
+    .delete(verifyToken, deletePlaylist);
 
 router
     .route("/playlists/:id/problems")
     .get(verifyToken, getProblemsInPlaylist)
-    .post(verifyToken, checkAdmin, addProblemToPlaylist);
+    .post(verifyToken, addProblemToPlaylist);
 
 router
     .route("/playlists/:id/problems/:problemId")
-    .delete(verifyToken, checkAdmin, removeProblemFromPlaylist);
+    .delete(verifyToken, removeProblemFromPlaylist);
 
 router.route("/users/:userId/playlists").get(verifyToken, getPlaylistsByUser);
 
