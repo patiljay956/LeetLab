@@ -40,6 +40,7 @@ model User {
   submission submission[]
 
   problemSolved problemSolved[]
+  Playlist      Playlist[]
 }
 
 model Problem {
@@ -67,6 +68,10 @@ model Problem {
   submission submission[]
 
   problemSolvedBy problemSolved[]
+  Playlist        Playlist?       @relation(fields: [playlistId], references: [id])
+  playlistId      String?
+
+  ProblemsInPlaylist ProblemsInPlaylist[]
 }
 
 model submission {
@@ -125,4 +130,35 @@ model problemSolved {
 
   @@unique([userId, problemId]) // Ensure a user can only solve a problem once
   @@index([userId, problemId]) // Index for faster lookups
+}
+
+model Playlist {
+  id          String               @id @default(uuid())
+  name        String
+  description String?
+  userId      String
+  problems    ProblemsInPlaylist[]
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  Problem Problem[]
+
+  @@unique([userId, name]) // Ensure a user can only have one playlist with a specific name
+  @@index([userId]) // Index for faster lookups
+  @@index([name]) // Index for faster lookups by name
+}
+
+model ProblemsInPlaylist {
+  id         String   @id @default(uuid())
+  playlistId String
+  problemId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  playlist Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  problem  Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, problemId]) // Ensure a problem can only be in a playlist once
+  @@index([playlistId, problemId]) // Index for faster lookups
 }
