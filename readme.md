@@ -97,6 +97,10 @@ LeetLab/
 
    # (Optional) Seed the database
    npx prisma db seed
+
+   npx prisma studio  # Open Prisma Studio to view the database
+
+   nxp prisma db push  # Push schema changes to the database
    ```
 
 5. **Start the development server**

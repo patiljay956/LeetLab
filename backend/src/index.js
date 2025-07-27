@@ -24,11 +24,12 @@ app.use(cookieParser());
 import authRoutes from "./routes/auth.routes.js";
 import problemRoutes from "./routes/problem.routes.js";
 import executionRoutes from "./routes/execution.routes.js";
+import playlistRoutes from "./routes/playlist.routes.js";
 // Routes Declaration
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/problem", problemRoutes);
 app.use("/api/v1/code-evaluation", executionRoutes);
-
+app.use("/api/v1/playlist", playlistRoutes);
 // Global Error Handler
 import { ApiError } from "./utils/apiErrors.js";
 
